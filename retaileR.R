@@ -148,4 +148,4 @@ mean.items.times <- function(X, date_var= "Date", time_var= "Time", quantity_var
             names.arg =  substr(mean_hour[[time_var]], 1, 2), ... )
   }
   return(mean_hour)
-}
+} 
