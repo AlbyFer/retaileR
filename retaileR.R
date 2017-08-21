@@ -7,8 +7,8 @@
 closure_opp_cost <- function(time_closure, weekdays = TRUE, date_var= "Date", time_var= "Time", sales_var= "Final.price..GBP.",
                              format_time= "%H:%M:%S", X){
   
-  # Estimate the shop closure opportunity cost and fit a distribution. The default inputs values work for an 
-  # IZettle dataset
+  # Estimate the shop closure opportunity cost mean, median and stdev. Provides late sales. The default inputs values 
+  # work for an IZettle dataset.
   # Inputs: X - a data frame of unitary sales
   #         time_closure - a string vector containing the shop closure time for which to estimate the opportunity cost. Its format
   #                        must match format_time.
@@ -17,7 +17,7 @@ closure_opp_cost <- function(time_closure, weekdays = TRUE, date_var= "Date", ti
   #         time_var - the column name, as string, of the column in X containing the time of each unitary sale.
   #         sales_var - the column name, as string, of the column in X containing the monetary value of each unitary sale.
   #         format_time - the time format as string.
-  # Output: a scalar
+  # Output: a named list
   
 
   if(weekdays == TRUE) {
@@ -28,7 +28,16 @@ closure_opp_cost <- function(time_closure, weekdays = TRUE, date_var= "Date", ti
   
   late.sales <- subset(sales, sales[,time_var] > strptime(time_closure, format = format_time))
   late.sales.by.day <- aggregate(as.formula(paste(sales_var,"~",date_var)), late.sales, sum)
-  avg.late.sales <- sum(late.sales.by.day[,sales_var])/length(unique(sales[,date_var]))
+  len <- length(unique(sales[,date_var])) - nrow(late.sales.by.day)
+  all_late_sales <- c(late.sales.by.day[,sales_var], rep(0,len))
+  
+  median.late.sales <- median(all_late_sales)
+  mean.late.sales <- mean(all_late_sales)
+  std.late.sales <- sd(all_late_sales)
+  stats <- list("Mean"= mean.late.sales, "Median"=median.late.sales, "StDev"=std.late.sales, 
+                "Late Sales"= all_late_sales)
+  return(stats)
+}
   
   return(avg.late.sales)
   
